@@ -10,40 +10,14 @@ import SwiftUI
 @main
 struct iOS_TwitterApp: App {
     
+    let presenter = DefaultTweetFeedPresenter(getTweets: GetTweetsInteractor())
+    
+    
     var body: some Scene {
         WindowGroup {
             NavigationView {
-                ContentView()
+                TweetFeedView(presenter: presenter)
             }
-//            .navigationBarColor(backgroundColor: .systemTeal, tintColor: .white)
         }
     }
-    
-}
-
-extension View {
-  func navigationBarColor(backgroundColor: UIColor, tintColor: UIColor) -> some View {
-    
-    self.modifier(NavigationBarColor(backgroundColor: backgroundColor, tintColor: tintColor))
-  }
-}
-
-struct NavigationBarColor: ViewModifier {
-
-  init(backgroundColor: UIColor, tintColor: UIColor) {
-    let coloredAppearance = UINavigationBarAppearance()
-    coloredAppearance.configureWithOpaqueBackground()
-    coloredAppearance.backgroundColor = backgroundColor
-    coloredAppearance.titleTextAttributes = [.foregroundColor: tintColor]
-    coloredAppearance.largeTitleTextAttributes = [.foregroundColor: tintColor]
-                   
-    UINavigationBar.appearance().standardAppearance = coloredAppearance
-    UINavigationBar.appearance().scrollEdgeAppearance = coloredAppearance
-    UINavigationBar.appearance().compactAppearance = coloredAppearance
-    UINavigationBar.appearance().tintColor = tintColor
-  }
-
-  func body(content: Content) -> some View {
-    content
-  }
 }

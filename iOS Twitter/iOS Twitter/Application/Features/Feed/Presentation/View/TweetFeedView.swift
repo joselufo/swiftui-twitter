@@ -1,76 +1,44 @@
 //
-//  ContentView.swift
+//  TweetFeedView.swift
 //  iOS Twitter
 //
-//  Created by Jose Luis Franconetti Olmedo on 14/6/21.
+//  Created by Jose Luis Franconetti Olmedo on 15/6/21.
 //
 
 import SwiftUI
 
-struct User: Identifiable {
-    let id = UUID()
+struct TweetFeedView: View, TweetFeedPresenterView {
     
-    let name: String
-    let avatar: Color
-    let username: String
-}
-
-struct Tweet: Identifiable {
-    let id = UUID()
+    private let presenter: TweetFeedPresenter
     
-    let user: User
-    let message: String
-    let date: Date = Date().addingTimeInterval(Double.random(in: -100000...0))
-    
-    let image: Color?
-    let url: String?
-    
-    let messageCount: Int
-    let retweetCount: Int
-    let favouriteCount: Int
-}
-
-let users = [
-    User(name: "Jose Luis", avatar: Color.red, username: "@joselufo"),
-    User(name: "Victor", avatar: Color.blue, username: "@victor"),
-    User(name: "Javier", avatar: Color.orange, username: "@javi")
-]
-
-private func random() -> Int {
-    Int.random(in: 0...400)
-}
-
-let tweets: [Tweet] = [
-    Tweet(user: users.randomElement()!, message: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s", image: nil, url: nil, messageCount: random(), retweetCount: random(), favouriteCount: random()),
-    Tweet(user: users.randomElement()!, message: "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using", image: Color.red, url: nil, messageCount: random(), retweetCount: random(), favouriteCount: random()),
-    Tweet(user: users.randomElement()!, message: "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour", image: nil, url: nil, messageCount: random(), retweetCount: random(), favouriteCount: random()),
-    Tweet(user: users.randomElement()!, message: "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old", image: nil, url: nil, messageCount: random(), retweetCount: random(), favouriteCount: random()),
-]
-
-struct ContentView: View {
-    
-    static var dateFormatter: RelativeDateTimeFormatter = {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .abbreviated
-        return formatter
-    }()
+    @State private var tweets = [TweetViewModel]()
+        
+    init(presenter: TweetFeedPresenter) {
+        self.presenter = presenter
+    }
     
     var body: some View {
         List(tweets) { tweet in
             TweetView(tweet: tweet).padding(4)
         }.listStyle(GroupedListStyle())
         .navigationTitle("Tweets")
+        .onAppear(perform: {
+            presenter.onViewDidAppear(view: self)
+        })
+    }
+    
+    func onDisplayTweets(tweets: [TweetViewModel]) {
+        self.tweets = tweets
     }
 }
 
 struct TweetView: View {
     
-    var tweet: Tweet
+    var tweet: TweetViewModel
     
     var body: some View {
         VStack {
             HStack(alignment: .top) {
-                
                 Circle()
                     .fill(tweet.user.avatar)
                     .frame(width: 50, height: 50)
@@ -82,7 +50,7 @@ struct TweetView: View {
 }
 
 struct TweetContentView: View {
-    var tweet: Tweet
+    var tweet: TweetViewModel
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -90,7 +58,7 @@ struct TweetContentView: View {
                 Text(tweet.user.name).bold().lineLimit(1)
                 Text(tweet.user.username).foregroundColor(.gray).font(.system(size: 14))
                 Text("-").foregroundColor(.gray).font(.system(size: 14))
-                Text("\(ContentView.dateFormatter.localizedString(for: tweet.date, relativeTo: Date()))").foregroundColor(.gray).font(.system(size: 14))
+                Text("\(TweetViewModel.dateFormatter.localizedString(for: tweet.date, relativeTo: Date()))").foregroundColor(.gray).font(.system(size: 14))
                 Spacer()
                 Image(systemName: "arrowshape.turn.up.forward").frame(width: 5, height: 5, alignment: .center)
             }.padding(EdgeInsets(top: 2, leading: 0, bottom: 2, trailing: 0))
@@ -109,7 +77,7 @@ struct TweetContentView: View {
 
 struct ActionBottomView: View {
     
-    var tweet: Tweet
+    var tweet: TweetViewModel
     
     var body: some View {
         HStack {
@@ -156,7 +124,7 @@ struct ActionBottomView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        TweetFeedView(presenter: DefaultTweetFeedPresenter(getTweets: GetTweetsInteractor()))
     }
 }
 
